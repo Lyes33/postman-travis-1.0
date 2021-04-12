@@ -1,0 +1,286 @@
+{
+	"info": {
+		"_postman_id": "becff1fc-ce14-49a2-ae65-ac7aa7ed9643",
+		"name": "googleBooks",
+		"description": "This api allows you to search for books from the api Google Books",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "listBooks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//---------variable declaration-------------------------------\r",
+							"   let keyWords = pm.iterationData.get('keyWord');\r",
+							"   let maxResult = pm.iterationData.get('maxResults');\r",
+							"   let jsonData = pm.response.json();\r",
+							"   let date = pm.globals.get('date');\r",
+							"\r",
+							"\r",
+							"//-------------date of test--------------------------------------------------------\r",
+							"pm.test('The date of this test is: '+ date), function(){\r",
+							"\r",
+							"}\r",
+							" //--------check if the keyword is empty or is string or number--------------------\r",
+							"if(keyWords ===\"\"){\r",
+							"        pm.test('The keyword is empty', function(){\r",
+							"        pm.expect(keyWords).to.eql('');\r",
+							" });\r",
+							"}else if(typeof(keyWords) === 'string'){\r",
+							"        pm.test('The keyword is an string', function(){\r",
+							"        pm.expect(keyWords).to.be.a('string');\r",
+							" });\r",
+							"}else if(typeof(keyWords) === 'number'){\r",
+							"       pm.test('The keyword is a number', function(){\r",
+							"       pm.expect(keyWords).to.be.a('number');\r",
+							" });\r",
+							"}else{\r",
+							"     pm.test('The keyword is inconnu', function(){\r",
+							" });\r",
+							"}    \r",
+							"\r",
+							"//--------check if the keyword is empty or is string or number--------------------\r",
+							"if(maxResult ===\"\"){\r",
+							"        pm.test('The maxResult is empty', function(){\r",
+							"        pm.expect(maxResult).to.eql('');\r",
+							" });\r",
+							"}else if(maxResult < 0){\r",
+							"        pm.test('The maxResult is less then 0', function(){\r",
+							"        pm.expect(maxResult).to.be.lte(0);;\r",
+							" });\r",
+							"}else if(maxResult > 0 && maxResult < 40){\r",
+							"       pm.test('The maxResult is bettwen 0 and 40', function(){\r",
+							"       pm.expect(maxResult).to.be.greaterThan(0); \r",
+							"       pm.expect(maxResult).to.be.lte(40);\r",
+							" });\r",
+							"}else{\r",
+							"     pm.test('The maxResult is greater then 40', function(){\r",
+							"        pm.expect(maxResult).to.be.greaterThan(40); \r",
+							" });\r",
+							"}    \r",
+							"//----------check if body includ variable keyWord--------------------------\r",
+							"      pm.test('The body includ the keyWord: '+ keyWords, function(){\r",
+							"      pm.expect(pm.response.text()).to.include(keyWords);\r",
+							" });\r",
+							"\r",
+							"\r",
+							"\r",
+							"//----------check if body includ name author--------------------------\r",
+							"// if(keyWords ==\"Angele Loiseau\"){\r",
+							"//       pm.test('the body includ the keyWord: '+ keyWords, function(){\r",
+							"//       pm.expect(pm.response.text()).to.include(keyWords);\r",
+							"//        });\r",
+							"// }\r",
+							"\r",
+							" \r",
+							"\r",
+							"//-----the request getBooks------------------\r",
+							"//if(responseCode.code === 200){\r",
+							"//if(pm.response.status === 200){  \r",
+							"let idVol = [];\r",
+							"  jsonData.items.forEach((items) => {\r",
+							"             idVol.push(items.id); \r",
+							"        console.log(items.id);\r",
+							"  })\r",
+							"pm.collectionVariables.set('idVol', idVol);\r",
+							"// }\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let date = new Date().toLocaleDateString();\r",
+							"pm.globals.set('date', date);\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}?q={{keyWord}}&maxResults={{maxResults}}",
+					"host": [
+						"{{url}}"
+					],
+					"query": [
+						{
+							"key": "q",
+							"value": "{{keyWord}}"
+						},
+						{
+							"key": "maxResults",
+							"value": "{{maxResults}}"
+						}
+					]
+				},
+				"description": "This request allows you to search for books using a keyword and display a maximum of desired results"
+			},
+			"response": []
+		},
+		{
+			"name": "getBooks",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"//---------variable declaration-------------------------------\r",
+							"let keyWords = pm.iterationData.get('keyWord');\r",
+							"let idVol = pm.collectionVariables.get('idVol')\r",
+							"let jsonData = pm.response.json();\r",
+							"let titre = jsonData.volumeInfo.title; \r",
+							"let isArray = jsonData.volumeInfo.authors; \r",
+							"let isEbook = jsonData.saleInfo.isEbook; \r",
+							"let haveProperty = jsonData.volumeInfo; \r",
+							"let webrederLink = jsonData.accessInfo.webReaderLink;\r",
+							"//-------\r",
+							"//if(responseCode.code === 200){\r",
+							"//if(pm.response.status === 200){ \r",
+							"if(idVol.length > 0){\r",
+							"    postman.setNextRequest('getBooks'); \r",
+							"}else{\r",
+							"    pm.collectionVariables.unset('idVol');\r",
+							"}\r",
+							"//}\r",
+							"//check if the response time is less or greater than 200ms\r",
+							"if(responseTime <= 200){\r",
+							"    pm.test('Response time less than or equal to 200 ms', function(){\r",
+							"       });\r",
+							"}else{\r",
+							"    pm.test('Response time is greater than 200 ms', function(){\r",
+							"       });\r",
+							"}\r",
+							"\r",
+							"//------------check if the title is not empty--------------------------------------\r",
+							"if( titre !=\"\"){\r",
+							"    pm.test('The title of this volume is: '+ titre, function(){\r",
+							"       });\r",
+							"}else{\r",
+							"  pm.test('This volume has no a title', function(){\r",
+							"       });\r",
+							"}\r",
+							"//------------------check if the author is array----------------------------------\r",
+							"pm.test('The field author is an array', () => pm.expect(isArray).to.be.an('array'));\r",
+							"\r",
+							"//------------------check if the books is co-written-----------------------------\r",
+							"if(isArray.length > 1){\r",
+							"     pm.test('The book is co-written by ' + isArray, function(){});\r",
+							"    \r",
+							"}else{\r",
+							"    pm.test('The book has only one author, its author is '+ isArray , function(){});\r",
+							"}\r",
+							"\r",
+							"\r",
+							"//-------------------check if the volume is an Ebook------------------------------\r",
+							"//pm.test('The volume is an Ebooks', () => pm.expect(isEbook).to.be.true);\r",
+							"if(isEbook === true){\r",
+							"      pm.test('The volume is an Ebook: ', function(){\r",
+							"       });\r",
+							"}else{\r",
+							"    pm.test('The volume is not an Ebook: ', function(){\r",
+							"       });\r",
+							"}\r",
+							"//---------------check if the books have a property subtitle----------------------\r",
+							"pm.test('Have property subtitle' + haveProperty.subtitle, () => pm.expect(haveProperty).to.have.property(\"subtitle\"))\r",
+							"\r",
+							"//------------------check if the books have a property width----------------------\r",
+							"pm.test('Have property width', () => pm.expect(haveProperty.dimensions).to.have.property(\"width\"))\r",
+							"\r",
+							"//------------------check if the books include the keyWords----------------------\r",
+							"if(pm.expect(pm.response.text()).to.include(keyWords)){\r",
+							"      pm.test('The body includ the keyWord: '+ keyWords, function(){\r",
+							"       });\r",
+							"}else{\r",
+							"     pm.test('The body not includ the keyWord: '+ keyWords, function(){\r",
+							"       });\r",
+							"}\r",
+							"//-----------check if the webrederLik is an url----------------------------------\r",
+							"if(webrederLink.startsWith('http')){\r",
+							"                    pm.test('The webrederLink is an URL', function(){});\r",
+							"              }else{\r",
+							"              pm.test('The webrederLink is not a URL', function(){});   \r",
+							"    }             \r",
+							"\r",
+							"//console.log(responseTime);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"let idVol = pm.collectionVariables.get('idVol'); \r",
+							"pm.variables.set('volumeId', idVol[0]); \r",
+							"idVol.shift();\r",
+							"pm.collectionVariables.set('idVol', idVol);\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/{{volumeId}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"{{volumeId}}"
+					]
+				},
+				"description": "This request allows you to search for books from its id (the id is retrieved dynamically thanks to the request listBooks"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"//check the code status",
+					"    pm.test('Status code is 200', function(){",
+					"       pm.response.to.have.status(200);",
+					"});",
+					"",
+					"",
+					"",
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "0a97b029-4674-40db-90e2-ea85299bdd6f",
+			"key": "url",
+			"value": "https://www.googleapis.com/books/v1/volumes"
+		}
+	]
+}
