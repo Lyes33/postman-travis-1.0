@@ -14,4 +14,4 @@ before_script:
 
 
 script:
-- node_modules/.bin/newman run tests/googleBooks.postman_collection.json -d tests/travis.csv
+- node_modules/.bin/newman run tests/googleBooks.postman_collection.json -d tests/.travis.csv
